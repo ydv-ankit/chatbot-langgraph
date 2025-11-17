@@ -128,11 +128,10 @@ async def generate_chat_stream(message: str, checkpoint_id: Optional[str] = None
             "messages": [HumanMessage(content=message)]
         }, config=config, version="v2"):
         event_type = event['event']
-        print("❌",event)
         match event_type:
             case "on_chat_model_stream":
                 chunk_content = serialize_ai_message(event['data']['chunk'])
-                safe_content = chunk_content.replace("'", "\\'").replace("\n", "\\n")
+                safe_content = chunk_content.replace("'", "\'")
                 yield f"data: {{\"type\": \"content\", \"content\": \"{safe_content}\"}}\n\n"
             
             case "on_chat_model_end":
@@ -159,7 +158,7 @@ async def generate_chat_stream(message: str, checkpoint_id: Optional[str] = None
         # yield f"data: {{\"type\": \"end\"}}\n\n"
 
 # API endpoints
-@app.get("/chat/stream/{message}")
+@app.get("/chat_stream/{message}")
 async def stream_chat(message: str, checkpoint_id: Optional[str] = Query(default=None)):
     return StreamingResponse(
         generate_chat_stream(message, checkpoint_id),
